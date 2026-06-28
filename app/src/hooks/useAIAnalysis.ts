@@ -2,8 +2,8 @@ import { useState, useCallback } from 'react';
 import type { Question } from '@/types/quiz';
 
 // Hardcoded API key - embedded in source for convenience
-const DEFAULT_API_KEY = 'sk-bPSzaoyRep4OEgaBIShdofgJ9n7pjpSXPA69mZHW0kLebk4v';
-const DEFAULT_PROVIDER = 0; // 0=Kimi, 1=DeepSeek, 2=OpenAI, 3=Tongyi
+const DEFAULT_API_KEY = 'sk-2c08af56afc6473da923ae8f1dc521d1';
+const DEFAULT_PROVIDER = 1; // 0=Kimi, 1=DeepSeek, 2=OpenAI, 3=Tongyi
 
 export interface AIProvider {
   name: string;
