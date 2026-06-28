@@ -38,3 +38,6 @@ dist.zip
 
 # Netlify
 .netlify
+
+# Generation progress
+scripts/.explanations-progress.json

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Lightbulb, CheckCircle2, XCircle, BookOpen, Sparkles, Loader2, AlertCircle } from 'lucide-react';
 import type { Question } from '@/types/quiz';
 import { useAIAnalysis } from '@/hooks/useAIAnalysis';
@@ -151,21 +151,18 @@ function getOptionEntries(q: Question) {
 
 export default function QuestionAnalysis({ question, selectedLabel, isCorrect }: Props) {
   const { analyze, loading, error, result } = useAIAnalysis();
-  const [hasKey, setHasKey] = useState(false);
   const localLaw = useMemo(() => findLocalLaw(question), [question]);
   const entries = useMemo(() => getOptionEntries(question), [question]);
   const correctLabel = question.type === 'truefalse' ? (question.answer === true ? 'A' : 'B') : String(question.answer);
 
   useEffect(() => {
-    const key = localStorage.getItem('hzp_ai_api_key');
-    setHasKey(!!key);
-    if (key) analyze(question, selectedLabel, isCorrect);
+    analyze(question, selectedLabel, isCorrect);
   }, [question, selectedLabel, isCorrect, analyze]);
 
   const lawName = result?.lawName || localLaw?.lawName || '';
   const lawText = result?.lawText || localLaw?.lawText || '';
   const explain = result?.explain || localLaw?.explain || '';
-  const showAI = hasKey && result;
+  const showAI = !!result;
 
   return (
     <div className="mb-6 overflow-hidden rounded-2xl" style={{ border: '1px solid #1E2A3E', backgroundColor: '#0B1120' }}>
@@ -281,12 +278,10 @@ export default function QuestionAnalysis({ question, selectedLabel, isCorrect }:
           </div>
         )}
 
-        {!hasKey && !loading && (
+        {!loading && (
           <div className="mt-4 rounded-lg bg-space-800 p-3 text-center">
             <p className="text-xs text-text-muted">
-              以上解析基于本地法规库（21条精确法规）。
-              <a href="#/settings" className="ml-1 text-blue-400 hover:underline">设置 AI API Key</a>
-              可启用联网检索。
+              以上解析由 DeepSeek AI 根据相关法规自动生成。
             </p>
           </div>
         )}

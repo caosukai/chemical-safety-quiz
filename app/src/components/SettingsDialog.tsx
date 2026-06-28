@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, AlertTriangle, Sparkles, Key, CheckCircle2, Trash2 } from 'lucide-react';
+import { X, AlertTriangle, Sparkles, CheckCircle2 } from 'lucide-react';
 import gsap from 'gsap';
 import { useSettings, STORAGE_KEYS } from '@/hooks/useLocalStorage';
-import { AI_PROVIDERS } from '@/hooks/useAIAnalysis';
 import ConfirmDialog from './ConfirmDialog';
 
 interface SettingsDialogProps {
@@ -15,9 +14,6 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [settings, setSettings] = useSettings();
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const [apiKey, setApiKey] = useState(localStorage.getItem('hzp_ai_api_key') || '');
-  const [provider, setProvider] = useState(parseInt(localStorage.getItem('hzp_ai_provider') || '0', 10));
-  const [showApiKey, setShowApiKey] = useState(false);
 
   useEffect(() => {
     if (!overlayRef.current || !panelRef.current) return;
@@ -96,86 +92,21 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
             </div>
           </div>
 
-          {/* AI API Key */}
+          {/* AI Analysis */}
           <div className="mb-6">
             <label className="text-body text-text-secondary mb-3 flex items-center gap-2">
               <Sparkles size={16} className="text-yellow-400" />
               AI 智能解析
             </label>
-
-            {/* Provider selection */}
-            <div className="mb-3 grid grid-cols-2 gap-2">
-              {AI_PROVIDERS.slice(0, 4).map((p, i) => (
-                <button
-                  key={p.name}
-                  onClick={() => {
-                    setProvider(i);
-                    localStorage.setItem('hzp_ai_provider', String(i));
-                  }}
-                  className="rounded-lg px-2 py-2 text-xs transition-all"
-                  style={{
-                    backgroundColor: provider === i ? 'rgba(212, 249, 53, 0.1)' : '#141D2E',
-                    border: `1px solid ${provider === i ? '#D4F935' : '#1E2A3E'}`,
-                    color: provider === i ? '#D4F935' : '#94A3B8',
-                  }}
-                >
-                  <div className="font-bold">{p.name.split(' ')[0]}</div>
-                </button>
-              ))}
-            </div>
-
-            {/* API Key input */}
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <input
-                  type={showApiKey ? 'text' : 'password'}
-                  value={apiKey}
-                  onChange={(e) => {
-                    const val = e.target.value.trim();
-                    setApiKey(val);
-                    if (val) {
-                      localStorage.setItem('hzp_ai_api_key', val);
-                    } else {
-                      localStorage.removeItem('hzp_ai_api_key');
-                    }
-                  }}
-                  placeholder="粘贴 API Key"
-                  className="w-full rounded-lg bg-space-800 px-3 py-2.5 text-sm text-text-primary outline-none transition-all focus:ring-2 focus:ring-yellow-400/50 pr-14"
-                  style={{ border: '1px solid #1E2A3E' }}
-                />
-                <button
-                  onClick={() => setShowApiKey(!showApiKey)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-text-muted hover:text-text-secondary px-1"
-                >
-                  {showApiKey ? '隐藏' : '显示'}
-                </button>
-              </div>
-              {apiKey && (
-                <button
-                  onClick={() => {
-                    setApiKey('');
-                    localStorage.removeItem('hzp_ai_api_key');
-                  }}
-                  className="rounded-lg bg-space-800 px-3 py-2.5 text-sm text-error-400 transition-all hover:bg-error-500/10"
-                  style={{ border: '1px solid #1E2A3E' }}
-                  title="删除 API Key"
-                >
-                  <Trash2 size={16} />
-                </button>
-              )}
-            </div>
-
-            {apiKey ? (
-              <div className="mt-2 flex items-center gap-2 rounded-lg bg-success-500/10 px-3 py-2 text-xs text-success-400">
+            <div className="rounded-radius-md bg-space-800 p-4">
+              <div className="flex items-center gap-2 text-sm text-success-400">
                 <CheckCircle2 size={14} />
-                {AI_PROVIDERS[provider]?.name.split(' ')[0] || 'AI'} 已配置
+                DeepSeek AI 解析已内置
               </div>
-            ) : (
-              <div className="mt-2 flex items-center gap-2 rounded-lg bg-space-800 px-3 py-2 text-xs text-text-muted">
-                <Key size={14} />
-                未设置，使用本地法规库解析
-              </div>
-            )}
+              <p className="mt-2 text-xs text-text-muted">
+                840 道题目的法规依据和考点解读已预生成，无需设置 API Key。
+              </p>
+            </div>
           </div>
 
           {/* Quiz Info */}

@@ -15,7 +15,6 @@ import {
   XCircle,
   FileText,
   Sparkles,
-  Key,
 } from 'lucide-react';
 import Layout from '@/components/Layout';
 import ConfirmDialog from '@/components/ConfirmDialog';
@@ -31,7 +30,6 @@ import {
   STORAGE_KEYS,
 } from '@/hooks/useLocalStorage';
 import type { AppSettings, SyncData } from '@/types/quiz';
-import { AI_PROVIDERS } from '@/hooks/useAIAnalysis';
 
 interface ToastState {
   show: boolean;
@@ -61,9 +59,6 @@ export default function Settings() {
   const [showClearHistoryConfirm, setShowClearHistoryConfirm] = useState(false);
   const [toast, setToast] = useState<ToastState>({ show: false, message: '', type: 'success' });
   const [importResult, setImportResult] = useState<{ success: boolean; message: string } | null>(null);
-  const [apiKey, setApiKey] = useState(localStorage.getItem('hzp_ai_api_key') || '');
-  const [showApiKey, setShowApiKey] = useState(false);
-  const [provider, setProvider] = useState(parseInt(localStorage.getItem('hzp_ai_provider') || '0', 10));
 
   const toastRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -354,101 +349,13 @@ export default function Settings() {
             AI 智能解析
           </h2>
           <p className="text-sm text-text-muted mb-4">
-            设置 Kimi API Key 后，做题时 AI 会自动联网检索法规依据，给出更精确的题目解析。
-            API Key 仅保存在您的本地浏览器中，不会上传到任何服务器。
+            已内置 DeepSeek AI 解析，共 840 道题目的法规依据和考点解读已预生成。
+            做题时自动显示，无需设置 API Key。
           </p>
 
-          {/* Provider selection */}
-          <div className="mb-4">
-            <label className="text-body text-text-secondary mb-2 block">选择 AI 平台</label>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {AI_PROVIDERS.map((p, i) => (
-                <button
-                  key={p.name}
-                  onClick={() => {
-                    setProvider(i);
-                    localStorage.setItem('hzp_ai_provider', String(i));
-                  }}
-                  className="rounded-xl px-3 py-2 text-sm transition-all"
-                  style={{
-                    backgroundColor: provider === i ? 'rgba(212, 249, 53, 0.1)' : '#141D2E',
-                    border: `1px solid ${provider === i ? '#D4F935' : '#1E2A3E'}`,
-                    color: provider === i ? '#D4F935' : '#94A3B8',
-                  }}
-                >
-                  <div className="font-bold">{p.name.split(' ')[0]}</div>
-                  <div className="mt-1 text-xs opacity-70">{p.desc}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mb-3">
-            <label className="text-body text-text-secondary mb-2 block">API Key</label>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <input
-                  type={showApiKey ? 'text' : 'password'}
-                  value={apiKey}
-                  onChange={(e) => {
-                    const val = e.target.value.trim();
-                    setApiKey(val);
-                    if (val) {
-                      localStorage.setItem('hzp_ai_api_key', val);
-                    } else {
-                      localStorage.removeItem('hzp_ai_api_key');
-                    }
-                  }}
-                  placeholder={`${AI_PROVIDERS[provider]?.keyPrefix || 'sk-'}xxxxxxxxxxxxxxxx`}
-                  className="w-full rounded-xl bg-space-800 px-4 py-3 text-body text-text-primary outline-none transition-all focus:ring-2 focus:ring-yellow-400/50 pr-20"
-                  style={{ border: '1px solid #1E2A3E' }}
-                />
-                <button
-                  onClick={() => setShowApiKey(!showApiKey)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-muted hover:text-text-secondary"
-                >
-                  {showApiKey ? '隐藏' : '显示'}
-                </button>
-              </div>
-              {apiKey && (
-                <button
-                  onClick={() => {
-                    setApiKey('');
-                    localStorage.removeItem('hzp_ai_api_key');
-                    showToast('API Key 已删除', 'success');
-                  }}
-                  className="rounded-xl bg-space-800 px-4 py-3 text-body text-error-400 transition-all hover:bg-error-500/10"
-                  style={{ border: '1px solid #1E2A3E' }}
-                >
-                  删除
-                </button>
-              )}
-            </div>
-          </div>
-
-          {apiKey && (
-            <div className="flex items-center gap-2 rounded-xl bg-success-500/10 px-4 py-2 text-sm text-success-400">
-              <CheckCircle2 size={16} />
-              {AI_PROVIDERS[provider]?.name || 'AI'} 已配置，做题时自动启用联网解析
-            </div>
-          )}
-
-          {!apiKey && (
-            <div className="flex items-center gap-2 rounded-xl bg-space-800 px-4 py-2 text-sm text-text-muted">
-              <Key size={16} />
-              未设置 API Key，使用本地法规库解析（无需联网）
-            </div>
-          )}
-
-          <div className="mt-3 text-xs text-text-muted">
-            <p>推荐：DeepSeek 新用户有 <span className="text-lime-400">5000万 Token 免费额度</span>，价格更低</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <a href="https://platform.deepseek.com" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">DeepSeek</a>
-              <span className="text-space-600">|</span>
-              <a href="https://platform.moonshot.cn" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Kimi</a>
-              <span className="text-space-600">|</span>
-              <a href="https://dashscope.aliyun.com" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">通义千问</a>
-            </div>
+          <div className="flex items-center gap-2 rounded-xl bg-success-500/10 px-4 py-2 text-sm text-success-400">
+            <CheckCircle2 size={16} />
+            DeepSeek AI 解析已启用
           </div>
         </div>
 
