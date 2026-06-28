@@ -19,7 +19,7 @@ async function loadExplanations(): Promise<Record<string, AIAnalysisResult>> {
   if (explanationsCache) return explanationsCache;
   if (explanationsPromise) return explanationsPromise;
 
-  explanationsPromise = fetch('/explanations.json')
+  explanationsPromise = fetch('explanations.json')
     .then(res => {
       if (!res.ok) throw new Error('Failed to load explanations');
       return res.json();
