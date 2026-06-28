@@ -42,7 +42,7 @@ export function useQuizData(): UseQuizDataReturn {
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/questions.json')
+    fetch('questions.json')
       .then(res => {
         if (!res.ok) throw new Error(`Failed to load questions: ${res.status}`);
         return res.json();
