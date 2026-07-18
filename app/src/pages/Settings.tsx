@@ -15,6 +15,9 @@ import {
   XCircle,
   FileText,
   Sparkles,
+  Key,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import Layout from '@/components/Layout';
 import ConfirmDialog from '@/components/ConfirmDialog';
@@ -45,6 +48,13 @@ const fontSizeOptions: { value: AppSettings['fontSize']; label: string }[] = [
 
 const sampleQuestion = '危险化学品经营单位的主要负责人对本单位的安全生产工作全面负责，应当建立健全并落实本单位全员安全生产责任制。';
 
+const aiProviderOptions: { value: NonNullable<AppSettings['aiProvider']>; label: string }[] = [
+  { value: 'deepseek', label: 'DeepSeek' },
+  { value: 'kimi', label: 'Kimi' },
+  { value: 'tongyi', label: '通义千问' },
+  { value: 'openai', label: 'OpenAI' },
+];
+
 export default function Settings() {
   const [settings, setSettings] = useSettings();
   const [, setWrongQuestions] = useWrongQuestions();
@@ -59,6 +69,7 @@ export default function Settings() {
   const [showClearHistoryConfirm, setShowClearHistoryConfirm] = useState(false);
   const [toast, setToast] = useState<ToastState>({ show: false, message: '', type: 'success' });
   const [importResult, setImportResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [showApiKey, setShowApiKey] = useState(false);
 
   const toastRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -349,13 +360,62 @@ export default function Settings() {
             AI 智能解析
           </h2>
           <p className="text-sm text-text-muted mb-4">
-            已内置 DeepSeek AI 解析，共 840 道题目的法规依据和考点解读已预生成。
-            做题时自动显示，无需设置 API Key。
+            已内置 840 道题目的 AI 解析，无需设置即可使用。
+            如需更详细或实时的解析，可填写自己的 API Key。
           </p>
 
-          <div className="flex items-center gap-2 rounded-xl bg-success-500/10 px-4 py-2 text-sm text-success-400">
-            <CheckCircle2 size={16} />
-            DeepSeek AI 解析已启用
+          <div className="space-y-4">
+            <div>
+              <label className="text-body text-text-secondary mb-2 block">AI 提供商</label>
+              <div className="flex flex-wrap gap-2">
+                {aiProviderOptions.map(option => (
+                  <button
+                    key={option.value}
+                    onClick={() => setSettings(prev => ({ ...prev, aiProvider: option.value }))}
+                    className="rounded-radius-md px-4 py-2 text-sm transition-all duration-200"
+                    style={{
+                      backgroundColor: settings.aiProvider === option.value ? '#D4F935' : '#141D2E',
+                      color: settings.aiProvider === option.value ? '#030615' : '#94A3B8',
+                      border: settings.aiProvider === option.value ? 'none' : '1px solid #1E2A3E',
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-body text-text-secondary mb-2 block flex items-center gap-2">
+                <Key size={16} />
+                API Key（可选）
+              </label>
+              <div className="relative">
+                <input
+                  type={showApiKey ? 'text' : 'password'}
+                  value={settings.aiApiKey || ''}
+                  onChange={(e) => setSettings(prev => ({ ...prev, aiApiKey: e.target.value }))}
+                  placeholder="填写后优先使用在线 AI 解析，留空则使用内置解析"
+                  className="w-full rounded-radius-md bg-space-800 px-4 py-3 pr-12 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-success-400"
+                  style={{ border: '1px solid #1E2A3E' }}
+                />
+                <button
+                  onClick={() => setShowApiKey(prev => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted transition-colors hover:text-text-primary"
+                  aria-label={showApiKey ? '隐藏密钥' : '显示密钥'}
+                >
+                  {showApiKey ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-text-muted">
+                密钥仅保存在本地浏览器，不会上传到服务器。支持 Kimi、DeepSeek、通义千问、OpenAI。
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 rounded-xl bg-success-500/10 px-4 py-2 text-sm text-success-400">
+              <CheckCircle2 size={16} />
+              {settings.aiApiKey?.trim() ? `${aiProviderOptions.find(o => o.value === settings.aiProvider)?.label || 'DeepSeek'} 在线解析已启用` : '内置 AI 解析已启用'}
+            </div>
           </div>
         </div>
 

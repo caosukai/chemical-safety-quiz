@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, AlertTriangle, Sparkles, CheckCircle2 } from 'lucide-react';
+import { X, AlertTriangle, Sparkles, CheckCircle2, Key, Eye, EyeOff } from 'lucide-react';
 import gsap from 'gsap';
 import { useSettings, STORAGE_KEYS } from '@/hooks/useLocalStorage';
 import ConfirmDialog from './ConfirmDialog';
+import type { AppSettings } from '@/types/quiz';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -14,6 +15,7 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [settings, setSettings] = useSettings();
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
 
   useEffect(() => {
     if (!overlayRef.current || !panelRef.current) return;
@@ -43,6 +45,13 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
     { value: 'normal', label: '标准' },
     { value: 'large', label: '大' },
     { value: 'extra-large', label: '更大' },
+  ];
+
+  const aiProviderOptions: { value: NonNullable<AppSettings['aiProvider']>; label: string }[] = [
+    { value: 'deepseek', label: 'DeepSeek' },
+    { value: 'kimi', label: 'Kimi' },
+    { value: 'tongyi', label: '通义千问' },
+    { value: 'openai', label: 'OpenAI' },
   ];
 
   return (
@@ -98,14 +107,55 @@ export default function SettingsDialog({ open, onClose }: SettingsDialogProps) {
               <Sparkles size={16} className="text-yellow-400" />
               AI 智能解析
             </label>
-            <div className="rounded-radius-md bg-space-800 p-4">
-              <div className="flex items-center gap-2 text-sm text-success-400">
-                <CheckCircle2 size={14} />
-                DeepSeek AI 解析已内置
+            <div className="rounded-radius-md bg-space-800 p-4 space-y-4">
+              <div>
+                <label className="text-xs text-text-muted mb-2 block">AI 提供商</label>
+                <div className="flex flex-wrap gap-2">
+                  {aiProviderOptions.map(option => (
+                    <button
+                      key={option.value}
+                      onClick={() => setSettings(prev => ({ ...prev, aiProvider: option.value }))}
+                      className="rounded-radius-md px-3 py-1.5 text-xs transition-all duration-200"
+                      style={{
+                        backgroundColor: settings.aiProvider === option.value ? '#D4F935' : '#141D2E',
+                        color: settings.aiProvider === option.value ? '#030615' : '#94A3B8',
+                        border: settings.aiProvider === option.value ? 'none' : '1px solid #1E2A3E',
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <p className="mt-2 text-xs text-text-muted">
-                840 道题目的法规依据和考点解读已预生成，无需设置 API Key。
-              </p>
+
+              <div>
+                <label className="text-xs text-text-muted mb-2 block flex items-center gap-1">
+                  <Key size={12} />
+                  API Key（可选）
+                </label>
+                <div className="relative">
+                  <input
+                    type={showApiKey ? 'text' : 'password'}
+                    value={settings.aiApiKey || ''}
+                    onChange={(e) => setSettings(prev => ({ ...prev, aiApiKey: e.target.value }))}
+                    placeholder="填写后优先使用在线 AI 解析"
+                    className="w-full rounded-radius-md bg-space-900 px-3 py-2 pr-10 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-success-400"
+                    style={{ border: '1px solid #1E2A3E' }}
+                  />
+                  <button
+                    onClick={() => setShowApiKey(prev => !prev)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted transition-colors hover:text-text-primary"
+                    aria-label={showApiKey ? '隐藏密钥' : '显示密钥'}
+                  >
+                    {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs text-success-400">
+                <CheckCircle2 size={14} />
+                {settings.aiApiKey?.trim() ? `${aiProviderOptions.find(o => o.value === settings.aiProvider)?.label || 'DeepSeek'} 在线解析已启用` : '内置 AI 解析已启用'}
+              </div>
             </div>
           </div>
 

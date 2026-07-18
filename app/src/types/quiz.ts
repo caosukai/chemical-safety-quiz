@@ -55,9 +55,12 @@ export interface SyncData {
 }
 
 export type FontSize = 'normal' | 'large' | 'extra-large';
+export type AIProvider = 'kimi' | 'deepseek' | 'openai' | 'tongyi';
 
 export interface AppSettings {
   fontSize: FontSize;
+  aiProvider?: AIProvider;
+  aiApiKey?: string;
 }
 
 export interface StorageSchema {
